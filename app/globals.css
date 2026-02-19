@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0C0C0C;
+  --color-bg-subtle: #1A1A1A;
+  --color-bg-elevated: #141414;
+  --color-bg-sidebar: #080808;
+  --color-card: #0A0A0A;
+  --color-card-glass: rgba(10, 10, 10, 0.92);
+  --color-foreground: #FFFFFF;
+  --color-foreground-secondary: #8a8a8a;
+  --color-muted: #6a6a6a;
+  --color-accent: #00FF88;
+  --color-accent-hover: #00cc6e;
+  --color-accent-light: rgba(0, 255, 136, 0.06);
+  --color-accent-border: rgba(0, 255, 136, 0.25);
+  --color-accent-glow: rgba(0, 255, 136, 0.12);
+  --color-border: #2f2f2f;
+  --color-border-hover: #3f3f3f;
+  --color-warning: #FF8800;
+  --color-warning-light: rgba(255, 136, 0, 0.08);
+  --color-warning-border: rgba(255, 136, 0, 0.3);
+  --color-danger: #FF4444;
+  --color-danger-light: rgba(255, 68, 68, 0.08);
+  --color-danger-border: rgba(255, 68, 68, 0.3);
+}
+
+@layer base {
+  body {
+    @apply text-foreground bg-bg antialiased;
+    font-family: var(--font-jetbrains, 'JetBrains Mono'), monospace;
+  }
+}
+
+/* Keyframes */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes statusPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes selectSlideIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Planner time grid -- too structural for pure Tailwind */
+.planner-calendar {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  overflow: auto;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.03) 76px, transparent 76px), var(--color-card);
+}
+.planner-time-grid { position: relative; height: calc(24 * 50px); }
+.planner-hour-row { position: absolute; left: 0; right: 0; height: 50px; border-top: 1px solid #1f1f1f; }
+.planner-hour-label { position: absolute; left: 10px; top: -8px; background: var(--color-card); color: var(--color-muted); font-size: 0.7rem; font-weight: 600; padding: 0 4px; }
+.planner-block-layer { position: absolute; inset: 0 0 0 76px; }
+.planner-block-layer-paired::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(0, 255, 136, 0.03) 0 50%, rgba(64, 140, 255, 0.04) 50% 100%),
+    linear-gradient(to right, transparent calc(50% - 0.5px), var(--color-border) 0, transparent calc(50% + 0.5px));
+}
+
+.planner-item {
+  position: absolute; border-radius: 0; box-sizing: border-box;
+  border: 1px solid transparent; padding: 14px 28px 12px 10px;
+  overflow-x: hidden; overflow-y: auto; cursor: grab;
+  box-shadow: none;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.planner-item:active { cursor: grabbing; }
+.planner-item-active { box-shadow: 0 0 0 3px var(--color-accent-glow); }
+.planner-item-event { background: rgba(255, 136, 0, 0.10); border-color: rgba(255, 136, 0, 0.3); }
+.planner-item-place { background: rgba(0, 255, 136, 0.06); border-color: rgba(0, 255, 136, 0.2); }
+.planner-item-owner-mine { background: rgba(0, 255, 136, 0.08); border-color: rgba(0, 255, 136, 0.35); }
+.planner-item-owner-partner { background: rgba(64, 140, 255, 0.12); border-color: rgba(64, 140, 255, 0.4); }
+
+/* Google Maps container needs absolute positioning */
+#map { position: absolute; inset: 0; background: #141414; }
+
+/* Google Maps InfoWindow dark overrides */
+.gm-style-iw.gm-style-iw-c {
+  background: #0A0A0A !important;
+  border: 1px solid #2f2f2f !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+.gm-style-iw-d { overflow: auto !important; }
+.gm-style-iw-tc::after {
+  background: #0A0A0A !important;
+  border: 1px solid #2f2f2f !important;
+  border-radius: 0 !important;
+}
+/* Close button */
+.gm-style-iw button.gm-ui-hover-effect {
+  filter: invert(1) !important;
+}
+
+/* Select dropdown animation */
+.select-content-animated { animation: selectSlideIn 0.18s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Toggle group data-state styling */
+[data-state='on'].toggle-item-styled {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent);
+  font-weight: 600;
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+/* Select item highlighted */
+[data-highlighted].select-item-styled {
+  background: var(--color-accent-light);
+  outline: none;
+}
+
+/* Calendar day selected state */
+.cal-day-selected {
+  border-color: var(--color-accent-border);
+  background: rgba(0, 255, 136, 0.06);
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+/* Ensure sidebar grid always stays two-column */
+.sidebar-grid-responsive {
+  grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+
+/* Dark scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2f2f2f; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f3f; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .layout-sidebar {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(50vh, 50vh) minmax(0, 1fr);
+  }
+  .layout-sidebar > .map-panel-shell { min-height: 50vh; }
+  .sidebar-responsive { height: auto; border-left: none; border-top: 1px solid var(--color-border); overflow: visible; }
+  .sidebar-grid-responsive { grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr) !important; height: auto; min-height: 60vh; }
+  .map-container-responsive { position: relative; height: 50vh; min-height: 50vh; }
+}
+
+@media (max-width: 640px) {
+  .topbar-responsive { padding: 0 12px; height: 48px; min-height: 48px; }
+  .topbar-nav-responsive { gap: 0; }
+  .topbar-nav-item-responsive { padding: 5px 8px; font-size: 0.75rem; gap: 3px; }
+  .topbar-actions-responsive { display: none !important; }
+  .layout-sidebar {
+    grid-template-rows: minmax(40vh, 40vh) minmax(0, 1fr);
+  }
+  .layout-sidebar > .map-panel-shell { min-height: 40vh; }
+  .sidebar-grid-responsive { grid-template-columns: 1fr !important; height: auto; min-height: 50vh; }
+  .day-list-responsive { flex-direction: column; overflow-y: auto; overflow-x: hidden; border-right: 1px solid var(--color-border); border-bottom: none; }
+  .day-list-item-responsive { min-width: 112px; flex-shrink: 0; }
+  .map-container-responsive { height: 40vh; min-height: 40vh; }
+  .planner-calendar { flex: 1; min-height: 300px; }
+}
